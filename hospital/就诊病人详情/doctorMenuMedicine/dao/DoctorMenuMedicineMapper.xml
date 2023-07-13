@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.qhit.doctorMenuMedicine.dao.IDoctorMenuMedicineDao"> 
+	<!-- 自定义结果集 --> 
+	<resultMap id="BaseResultMap" type="com.qhit.doctorMenuMedicine.pojo.DoctorMenuMedicine"> 
+		<id property="mdId" column="md_id" javaType="java.lang.Integer"></id> 
+		<result property="menuId" column="menu_id" javaType="java.lang.Integer"></result> 
+		<result property="codeId" column="code_id" javaType="java.lang.Integer"></result> 
+		<result property="amt" column="amt" javaType="java.lang.Integer"></result>
+		<association property="medicineCode" javaType="com.qhit.medicineCode.pojo.MedicineCode">
+			<id property="codeId" column="code_id" javaType="java.lang.Integer"></id>
+			<result property="medicineName" column="medicine_name" javaType="java.lang.String"></result>
+		</association>
+		<association property="doctorMenu" javaType="com.qhit.doctorMenu.pojo.DoctorMenu">
+			<id property="menuId" column="menu_id" javaType="java.lang.Integer"></id>
+			<result property="menuName" column="menu_name" javaType="java.lang.String"></result>
+			<result property="userId" column="user_id" javaType="java.lang.Integer"></result>
+			<result property="description" column="description" javaType="java.lang.String"></result>
+			<result property="type" column="type" javaType="java.lang.Integer"></result>
+			<result property="typedesc" column="typedesc" javaType="java.lang.String"></result>
+		</association>
+		<!--<association property="doctorMenu" select="com.qhit.doctorMenu.dao.IDoctorMenuDao.findById" column="menu_id">
+		</association>-->
+			<!--<association property="doctorMenu" javaType="com.qhit.doctorMenu.pojo.DoctorMenu">
+				<id property="menuId" column="menu_id" javaType="java.lang.Integer"></id>
+				<result property="menuName" column="menu_name" javaType="java.lang.String"></result>
+			</association>-->
+	</resultMap>
+ 
+	<!-- 在各种标签中，id属性必须与接口中的方法名一样，id的值必须是唯一的，parameterType指查询时使用的参数类型， 
+	resultType属性指明查询返回的结果集类型    --> 
+ 
+	<sql id="Base_Column_List" > 
+		md_id,menu_id,code_id,amt 
+	</sql> 
+	<select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Integer" > 
+		select 
+		<include refid="Base_Column_List" /> 
+		from doctor_menu_medicine 
+		where md_id = #{mdId} 
+	</select> 
+	<delete id="delete" parameterType="java.lang.Integer" > 
+		delete from doctor_menu_medicine 
+		where md_id = #{mdId} 
+	</delete> 
+	<insert id="insert" parameterType="com.qhit.doctorMenuMedicine.pojo.DoctorMenuMedicine" > 
+		insert into doctor_menu_medicine(menu_id,code_id,amt) 
+		values (#{menuId},#{codeId},#{amt}) 
+	</insert> 
+	<update id="updateSelective" parameterType="com.qhit.doctorMenuMedicine.pojo.DoctorMenuMedicine" > 
+		update doctor_menu_medicine 
+		<set > 
+			<if test="menuId != null and menuId!='' " > 
+				menu_id = #{menuId}, 
+			</if> 
+			<if test="codeId != null and codeId!='' " > 
+				code_id = #{codeId}, 
+			</if> 
+			<if test="amt != null and amt!='' " > 
+				amt = #{amt}, 
+			</if> 
+		</set> 
+		where md_id = #{mdId} 
+	</update> 
+	<update id="update" parameterType="com.qhit.doctorMenuMedicine.pojo.DoctorMenuMedicine" > 
+		update doctor_menu_medicine 
+		set  menu_id = #{menuId}, code_id = #{codeId}, amt = #{amt} 
+		where md_id = #{mdId} 
+	</update> 
+	<select id="findAll" resultMap="BaseResultMap" > 
+		select 
+		<include refid="Base_Column_List" /> 
+		from doctor_menu_medicine 
+	</select> 
+	<select id="findByMenuId" resultMap="BaseResultMap" parameterType="java.lang.Integer" > 
+		select 
+		<include refid="Base_Column_List" /> 
+		from doctor_menu_medicine 
+		where menu_id = #{menuId} 
+	</select> 
+	<select id="findByCodeId" resultMap="BaseResultMap" parameterType="java.lang.Integer" > 
+		select 
+		<include refid="Base_Column_List" /> 
+		from doctor_menu_medicine 
+		where code_id = #{codeId} 
+	</select> 
+	<select id="findByAmt" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+		select
+		<include refid="Base_Column_List" />
+		from doctor_menu_medicine
+		where amt = #{amt}
+	</select>
+
+
+	<select id="findsMedicine" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from doctor_menu_medicine
+		where menu_id= #{menuId}
+	</select>
+	<select id="findmedicinetaocanid" resultMap="BaseResultMap" >
+		<!--select
+		<include refid="Base_Column_List" />
+		from doctor_menu_medicine
+		where menu_id= #{menuId}-->
+		SELECT *
+		from doctor_menu_medicine dmm
+		JOIN doctor_menu dm
+		ON dmm.menu_id=dm.menu_id
+		JOIN medicine_code mc
+		ON dmm.code_id=mc.code_id
+		WHERE dm.menu_id=#{menuId}
+	</select>
+
+	<delete id="deleteBatch" parameterType="java.util.Arrays"> 
+		delete from doctor_menu_medicine where md_id in 
+		<foreach collection="array" item="id" open="(" close=")" separator=","> 
+			#{id} 
+		</foreach> 
+	</delete>
+
+
+	<select id="search" parameterType="com.qhit.doctorMenuMedicine.pojo.DoctorMenuMedicine" resultMap="BaseResultMap"> 
+		select * from  doctor_menu_medicine 
+		<where > 
+			<if test="menuId != null and menuId!='' " > 
+				 and menu_id = #{menuId} 
+			</if> 
+			<if test="codeId != null and codeId!='' " > 
+				 and code_id = #{codeId} 
+			</if> 
+			<if test="amt != null and amt!='' " > 
+				 and amt = #{amt} 
+			</if> 
+		</where> 
+	</select>
+
+	<select id="distributeLeft" resultMap="BaseResultMap">
+		SELECT mc.code_id,mc.medicine_name,dmm.amt FROM medicine_code mc JOIN doctor_menu_medicine dmm
+		ON mc.code_id = dmm.code_id
+		WHERE dmm.menu_id=#{0};
+	</select>
+
+
+	<select id="findMedicine" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		SELECT <include refid="Base_Column_List" /> FROM doctor_menu_medicine
+		WHERE menu_id=#{menuId};
+	</select>
+
+	<select id="distributeRight" resultMap="BaseResultMap">
+		SELECT mc.code_id,mc.medicine_name,1 AS amt FROM medicine_code mc WHERE mc.code_id NOT IN(
+		SELECT mc.code_id FROM medicine_code mc JOIN doctor_menu_medicine dmm
+		ON mc.code_id = dmm.code_id
+		WHERE dmm.menu_id=#{0})
+	</select>
+</mapper> 
